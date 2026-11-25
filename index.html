@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#f2f2f7" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="FORMA" />
+    <meta name="description" content="FORMA – Personal Strength & Longevity Coach" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" href="./icons/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./icons/icon-180.png" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="FORMA – Personal Strength &amp; Longevity Coach" />
+    <meta property="og:description" content="Calisthenics-Training mit dem eigenen Körpergewicht: täglicher Plan, geführte Einheiten, Fortschritt. Kostenlos, offline, Daten bleiben auf deinem Gerät." />
+    <meta property="og:image" content="https://maxfourmoritz.github.io/Forma/icons/icon-512.png" />
+    <meta name="twitter:card" content="summary" />
+    <title>FORMA</title>
+    <script>
+      /* Start-Wächter: Falls die App nicht startet (z. B. veraltete Startseite im Zwischenspeicher direkt nach einem Update),
+         bereinigt FORMA den App-Cache und lädt selbst neu. Gespeicherte Trainingsdaten (IndexedDB) werden dabei nie angetastet. */
+      (function () {
+        var KEY = 'forma.boot.tries', errs = [], healing = false;
+        window.__formaMounted = false;
+        function tries() { try { return Number(sessionStorage.getItem(KEY) || 0); } catch (e) { return 0; } }
+        function setTries(n) { try { sessionStorage.setItem(KEY, String(n)); } catch (e) {} }
+        window.__formaBootOk = function () { window.__formaMounted = true; try { sessionStorage.removeItem(KEY); } catch (e) {} };
+        window.addEventListener('error', function (e) {
+          var t = e.target, url = t && (t.src || t.href);
+          if (url && t !== window) { errs.push('Laden fehlgeschlagen: ' + String(url).split('/').slice(-2).join('/')); heal(300); }
+          else errs.push(e.message || 'Unbekannter Fehler');
+        }, true);
+        window.addEventListener('unhandledrejection', function (e) { errs.push('Promise: ' + ((e.reason && e.reason.message) || e.reason)); });
+        function clean() {
+          var regs = navigator.serviceWorker && navigator.serviceWorker.getRegistrations ? navigator.serviceWorker.getRegistrations() : Promise.resolve([]);
+          return regs.then(function (rs) { return Promise.all(rs.map(function (r) { return r.unregister(); })); })
+            .then(function () { return window.caches ? caches.keys().then(function (ks) { return Promise.all(ks.filter(function (k) { return k.indexOf('forma-') === 0; }).map(function (k) { return caches.delete(k); })); }) : 0; })
+            .catch(function () {});
+        }
+        function heal(delay) {
+          if (healing || window.__formaMounted) return;
+          var n = tries();
+          if (n >= 3) { panel(); return; }
+          healing = true; setTries(n + 1);
+          setTimeout(function () {
+            clean().then(function () { location.replace(location.pathname + '?r=' + Date.now() + location.hash); });
+          }, delay + n * 2500);
+        }
+        function panel() {
+          if (window.__formaMounted || document.getElementById('forma-boot-panel')) return;
+          var d = document.createElement('div'); d.id = 'forma-boot-panel';
+          d.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#f2f2f7;color:#111;font:16px/1.45 -apple-system,system-ui,sans-serif;padding:32px 22px;overflow:auto';
+          var info = (errs.length ? errs.slice(0, 4).join('\n') : 'keine Fehlermeldung') + '\n' + navigator.userAgent;
+          d.innerHTML = '<h1 style="font-size:26px;margin:0 0 10px">FORMA konnte nicht starten</h1><p>Bitte prüfe deine Internetverbindung und versuche es erneut. Deine gespeicherten Trainingsdaten sind davon nicht betroffen.</p><button id="forma-retry" style="margin:8px 0 18px;height:50px;padding:0 24px;border:0;border-radius:14px;background:#0a8bb5;color:#fff;font-size:17px;font-weight:600">Erneut versuchen</button><p style="font-size:13px;color:#666;white-space:pre-wrap;word-break:break-all"></p>';
+          d.querySelector('p:last-child').textContent = info;
+          document.body.appendChild(d);
+          document.getElementById('forma-retry').onclick = function () { setTries(0); clean().then(function () { location.replace(location.pathname + '?r=' + Date.now() + location.hash); }); };
+        }
+        setTimeout(function () { if (!window.__formaMounted) { errs.length || errs.push('App wurde nicht gestartet (Zeitüberschreitung)'); heal(0); } }, 5000);
+      })();
+    </script>
+  </head>
+  <body>
+    <noscript><p style="font-family:system-ui;padding:24px">FORMA benötigt JavaScript.</p></noscript>
+    <div id="app"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
