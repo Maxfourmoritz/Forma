@@ -223,7 +223,7 @@ function Health({ p, save }: { p: Profile; save: (p: Profile) => void }) {
       {(rules.needsClearance || p.cardioClearance !== 'frei') && (
         <>
           <Field label="Ärztliche Freigabe für sportliche Belastung">
-            <Seg value={p.cardioClearance} options={[['ausstehend', 'Ausstehend'], ['frei', 'Freigegeben'], ['eingeschraenkt', 'Mit Einschränkung']]} onChange={(v) => save({ ...p, cardioClearance: v })} />
+            <Seg value={p.cardioClearance} options={[['ausstehend', 'Ausstehend'], ['frei', 'Freigegeben'], ['eingeschraenkt', 'Mit Einschränkung']]} onChange={(v) => save(v === 'frei' ? { ...withConditions(p, (p.conditions ?? []).filter((id) => id !== 'abklaerung_offen')), cardioClearance: 'frei' } : { ...p, cardioClearance: v })} />
           </Field>
           <p class="xs faint" style={{ margin: 0 }}>Erst auf „Freigegeben“ stellen, wenn die ärztliche Untersuchung erfolgt ist und keine Einschränkungen ausgesprochen wurden. Dann werden hochintensive Intervalle und – soweit nicht aus anderen Gründen gesperrt – Kopf-unten-Übungen freigeschaltet.</p>
         </>

@@ -423,3 +423,6 @@ hr { border: 0; height: 0.5px; background: var(--sep); }
 .figure .fg-far .fg-shoe { fill: color-mix(in srgb, var(--shoe) 75%, #7a8794); }
 .figure .fg-muscle { fill: var(--c-cardio); fill-opacity: 0.62; animation: mpulse 1.6s ease-in-out infinite; }
 @keyframes mpulse { 50% { fill-opacity: 0.3; } }
+
+/* Lange Auswahl-Chips umbrechen statt über den Rand zu laufen */
+.chips.wrap .chip { height: auto; min-height: 36px; padding: 7px 14px; white-space: normal; text-align: left; max-width: 100%; line-height: 1.3; }

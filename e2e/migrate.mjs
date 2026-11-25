@@ -14,4 +14,14 @@ ok(await p.getByText('Ärztliche Freigabe ausstehend').isVisible(), 'Freigabe-St
 await p.getByText('Gesundheit & Sicherheit').click();
 ok(await p.getByText('Ausgewählt (5)').isVisible(), 'Bestandsangaben als 5 Auswahlpunkte übernommen');
 for (const t of ['Meniskusriss', 'Kreuzbandverletzung', 'Gefühlsstörungen', 'pulssenkende', 'ärztliche Abklärung meiner']) ok(await p.getByText(t).first().isVisible().catch(() => false) || (await p.locator('.chip.on', { hasText: t.split(' ')[0] }).count()) > 0, 'Auswahl enthält: ' + t);
+// Darstellung: lange Auswahl-Chips laufen nicht über den Rand (nach Ende der Einblend-Animation messen)
+await p.waitForTimeout(700);
+const overflow = await p.evaluate(() => [...document.querySelectorAll('.chips.wrap .chip')].some((c) => c.getBoundingClientRect().right > window.innerWidth + 1));
+ok(!overflow, 'Auswahl-Chips überschreiten den Bildschirmrand nicht');
+await p.screenshot({ path: 'e2e/out/30-health-migrated.png' });
+// Freigabe bestätigen → offene Abklärung wird als erledigt entfernt
+await p.getByRole('tab', { name: 'Freigegeben' }).click();
+await p.waitForTimeout(300);
+ok(await p.getByText('Ausgewählt (4)').isVisible(), 'Freigabe bestätigt: „Abklärung steht aus“ ist abgehakt (4 Angaben bleiben)');
+ok(await p.getByText('Ärztliche Freigabe noch nicht bestätigt').count() === 0, 'Keine Warnung zur fehlenden Freigabe mehr');
 await b.close();

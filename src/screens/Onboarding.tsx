@@ -90,7 +90,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
       )}
       {rules.needsClearance && (
         <Field label="Liegt eine ärztliche Freigabe für sportliche Belastung vor?">
-          <Chips value={p.cardioClearance} options={[['ausstehend', 'Noch nicht geklärt'], ['frei', 'Ja, freigegeben'], ['eingeschraenkt', 'Mit Einschränkung']]} onChange={(v) => set({ cardioClearance: v })} />
+          <Chips value={p.cardioClearance} options={[['ausstehend', 'Noch nicht geklärt'], ['frei', 'Ja, freigegeben'], ['eingeschraenkt', 'Mit Einschränkung']]} onChange={(v) => setP(v === 'frei' ? { ...withConditions(p, (p.conditions ?? []).filter((id) => id !== 'abklaerung_offen')), cardioClearance: 'frei' } : { ...p, cardioClearance: v })} />
           <span class="xs faint">Solange sie nicht bestätigt ist, bleiben hochintensive Intervalle und Kopf-unten-Übungen gesperrt.</span>
         </Field>
       )}
